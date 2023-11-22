@@ -26,7 +26,7 @@ stages {
                     docker run -d --name cast_db -v postgres_data_cast:/var/lib/postgresql/data/ -e POSTGRES_USER=cast_db_username -e POSTGRES_PASSWORD=cast_db_password -e POSTGRES_DB=cast_db_dev -d postgres:12.1-alpine
                     docker run -d --name movie_service -p 8001:8000 -v ./movie-service/:/app/ -e DATABASE_URI=postgresql://movie_db_username:movie_db_password@movie_db/movie_db_dev -e CAST_SERVICE_HOST_URL=http://cast_service:8000/api/v1/casts/ --link movie_db $DOCKER_ID/$DOCKER_MOVIES_IMAGE:$DOCKER_TAG uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
                     docker run -d --name cast_service -p 8002:8000 -v ./cast-service/:/app/ -e DATABASE_URI=postgresql://cast_db_username:cast_db_password@cast_db/cast_db_dev --link cast_db $DOCKER_ID/$DOCKER_CAST_IMAGE:$DOCKER_TAG uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-                    docker run -d --name nginx -p 8080:8080 -v ./nginx_config.conf:/etc/nginx/conf.d/default.conf --link cast_service --link movie_service -d nginx:latest
+                    docker run -d --name nginx -p 8081:8080 -v ./nginx_config.conf:/etc/nginx/conf.d/default.conf --link cast_service --link movie_service -d nginx:latest
                     '''
                     }
                 }
@@ -36,7 +36,7 @@ stages {
             steps {
                     script {
                     sh '''
-                    curl localhost:8080
+                    curl localhost:8081
                     '''
                     }
             }

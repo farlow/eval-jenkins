@@ -11,7 +11,7 @@ stages {
             steps {
                 script {
                 sh '''
-                 docker rm -f jenkins
+                 docker rm -f nginx movie_db cast_db movie_service cast_service
                  docker build -t $DOCKER_ID/$DOCKER_CAST_IMAGE:$DOCKER_TAG ./cast-service
                  docker build -t $DOCKER_ID/$DOCKER_MOVIES_IMAGE:$DOCKER_TAG ./movie-service
                 '''

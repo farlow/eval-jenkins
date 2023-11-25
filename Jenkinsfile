@@ -145,8 +145,7 @@ stage('Deploiement en staging'){
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
         }
             steps {
-                {
-                    if (env.BRANCH_NAME == 'main') {
+                if (env.BRANCH_NAME == 'main') {
                     // Create an Approval Button with a timeout of 15minutes.
                     // this require a manuel validation in order to deploy on production environment
                     timeout(time: 15, unit: "MINUTES") {

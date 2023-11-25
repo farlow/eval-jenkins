@@ -145,27 +145,30 @@ stage('Deploiement en staging'){
         KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
         }
             steps {
-            // Create an Approval Button with a timeout of 15minutes.
-            // this require a manuel validation in order to deploy on production environment
+                {
+                    if (env.BRANCH_NAME == 'main') {
+                    // Create an Approval Button with a timeout of 15minutes.
+                    // this require a manuel validation in order to deploy on production environment
                     timeout(time: 15, unit: "MINUTES") {
                         input message: 'Do you want to deploy in production ?', ok: 'Yes'
                     }
 
-                script {
-                sh '''
-                rm -Rf .kube
-                mkdir .kube
-                ls
-                cat $KUBECONFIG > .kube/config
-                helm -n prod upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
-                helm -n prod upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
-                sleep 10
-                helm -n prod upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
-                helm -n prod upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
-                helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30883 helm-nginx/
-                echo $BRANCH_NAME
-                echo $GIT_BRANCH
-                '''
+                    script {
+                    sh '''
+                    rm -Rf .kube
+                    mkdir .kube
+                    ls
+                    cat $KUBECONFIG > .kube/config
+                    helm -n prod upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
+                    helm -n prod upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
+                    sleep 10
+                    helm -n prod upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
+                    helm -n prod upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
+                    helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30883 helm-nginx/
+                    '''
+                    }
+                } else {
+                    sh "echo 'Ce n'est pas la branche main, pas de déploiement en prod '"
                 }
             }
 

@@ -4,6 +4,7 @@ pipeline {
         DOCKER_CAST_IMAGE="cast-service"
         DOCKER_MOVIE_IMAGE="movie-service"
         DOCKER_TAG = "v.${BUILD_ID}.0" // we will tag our images with the current build in order to increment the value by 1 with each new build
+        BRANCH_NAME=env.BRANCH_NAME
     }
     agent any // Jenkins will be able to select all available agents
     stages {
@@ -130,15 +131,16 @@ pipeline {
             environment {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
             }
-            if (env.BRANCH_NAME == 'main') {
-                steps {
-                    // Create an Approval Button with a timeout of 15minutes.
-                    // this require a manuel validation in order to deploy on production environment
-                    timeout(time: 15, unit: "MINUTES") {
-                        input message: 'Do you want to deploy in production ?', ok: 'Yes'
-                    }
-                    script {
-                        sh '''
+            steps {
+                // Create an Approval Button with a timeout of 15minutes.
+                // this require a manuel validation in order to deploy on production environment
+                timeout(time: 15, unit: "MINUTES") {
+                    input message: 'Do you want to deploy in production ?', ok: 'Yes'
+                }
+                script {
+                    sh '''
+                    if [ \${BRANCH_NAME} == 'main' ]
+                    then
                         rm -Rf .kube
                         mkdir .kube
                         cat $KUBECONFIG > .kube/config
@@ -148,12 +150,9 @@ pipeline {
                         helm -n prod upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
                         helm -n prod upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
                         helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30883 helm-nginx/
-                        '''
-                    }
+                    fi
+                    '''
                 }
-            } 
-            else {
-                sh "echo 'Ce n'est pas la branche main, pas de déploiement en prod '"
             }
         }
     }

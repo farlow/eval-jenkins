@@ -74,12 +74,13 @@ stage('Deploiement en dev'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp helm/values.yaml values.yml
-                cat values.yml
-                sed -i "s+name.*+name: movie-db+g" values.yml                
-                helm upgrade --install movie-db --values=values.yml ./helm-db/ --namespace=dev
-                sed -i "s+name.*+name: cast-db+g" values.yml
-                helm upgrade --install cast-db --values=values.yml ./helm-db/ --namespace=dev
+
+                helm -n dev upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
+                helm -n dev upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
+                helm -n dev upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
+                helm -n dev upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
+                helm -n dev upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30880 helm-nginx/
+
                 '''
                 }
             }
@@ -97,14 +98,13 @@ stage('Deploiement en staging'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp helm/values.yaml values.yml
-                cat values.yml                
-                helm install movie-db --values=values.yml .
-                helm upgrade --install movie-db --values=values.yml .
 
+                helm -n staging upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
+                helm -n staging upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
+                helm -n staging upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
+                helm -n staging upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
+                helm -n staging upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30881 helm-nginx/
 
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app fastapi --values=values.yml --namespace staging
                 '''
                 }
             }
@@ -128,10 +128,11 @@ stage('Deploiement en staging'){
                 mkdir .kube
                 ls
                 cat $KUBECONFIG > .kube/config
-                cp fastapi/values.yaml values.yml
-                cat values.yml
-                sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" values.yml
-                helm upgrade --install app fastapi --values=values.yml --namespace prod
+                helm -n prod upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
+                helm -n prod upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
+                helm -n prod upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
+                helm -n prod upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
+                helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30882 helm-nginx/
                 '''
                 }
             }

@@ -14,9 +14,9 @@ spec:
 
 apiVersion: v1
 data:
-  POSTGRES_DB: bW92aWVfZGJfZGV2
-  POSTGRES_PASSWORD: bW92aWVfZGJfcGFzc3dvcmQ=
-  POSTGRES_USER: bW92aWVfZGJfdXNlcm5hbWU=
+  POSTGRES_DB: {{ .Values.db.postgresdb }}
+  POSTGRES_PASSWORD: {{ .Values.db.postgrespassword }}
+  POSTGRES_USER: {{ .Values.db.postgresuser }}
 kind: Secret
 metadata:
   name: {{ .Values.db.name }}-config

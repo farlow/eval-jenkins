@@ -87,6 +87,33 @@ stage('Deploiement en dev'){
             }
 
         }
+
+stage('Deploiement en QA'){
+        environment
+        {
+        KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
+        }
+            steps {
+                script {
+                sh '''
+                rm -Rf .kube
+                mkdir .kube
+                ls
+                cat $KUBECONFIG > .kube/config
+
+                helm -n dev QA --install movie-db --values helm-db/values-movie.yaml helm-db/
+                helm -n dev QA --install cast-db --values helm-db/values-cast.yaml helm-db/
+                sleep 10
+                helm -n dev QA --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
+                helm -n dev QA --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
+                helm -n dev QA --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30881 helm-nginx/
+
+                '''
+                }
+            }
+
+        }
+
 stage('Deploiement en staging'){
         environment
         {
@@ -105,7 +132,7 @@ stage('Deploiement en staging'){
                 sleep 10
                 helm -n staging upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
                 helm -n staging upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
-                helm -n staging upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30881 helm-nginx/
+                helm -n staging upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30882 helm-nginx/
 
                 '''
                 }
@@ -135,7 +162,9 @@ stage('Deploiement en staging'){
                 sleep 10
                 helm -n prod upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
                 helm -n prod upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
-                helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30882 helm-nginx/
+                helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30883 helm-nginx/
+                echo $BRANCH_NAME
+                echo $GIT_BRANCH
                 '''
                 }
             }

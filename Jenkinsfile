@@ -11,7 +11,7 @@ stages {
             steps {
                 script {
                 sh '''
-                 docker rm -f nginx movie_db cast_db movie_service cast_service
+                 docker rm -f cast-service  movie-service cast-db movie-db nginx
                  docker build -t $DOCKER_ID/$DOCKER_CAST_IMAGE:$DOCKER_TAG ./cast-service
                  docker build -t $DOCKER_ID/$DOCKER_MOVIE_IMAGE:$DOCKER_TAG ./movie-service
                 '''

@@ -138,8 +138,8 @@ pipeline {
                 }
                 script {
                     sh '''
-                    echo "$BRANCH_NAME"
-                    if [ $BRANCH_NAME = 'main' ]
+                    echo "toto : $BRANCH_NAME"
+                    if [ $BRANCH_NAME == 'main' ]
                     then
                         rm -Rf .kube
                         mkdir .kube

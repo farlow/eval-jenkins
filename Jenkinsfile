@@ -132,7 +132,7 @@ pipeline {
             }
             when {
                 expression {
-                    return env.BRANCH_NAME == 'origin/main';
+                    return env.GIT_BRANCH == 'origin/main';
                 }
             }
             steps {

@@ -138,7 +138,7 @@ pipeline {
                 }
                 script {
                     sh '''
-                    if [ $BRANCH_NAME == 'main' ]
+                    if [ $BRANCH_NAME = 'main' ]
                     then
                         rm -Rf .kube
                         mkdir .kube

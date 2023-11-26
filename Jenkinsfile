@@ -139,7 +139,7 @@ pipeline {
                 script {
                     sh '''
                     echo "toto : $BRANCH_NAME"
-                    if [ $BRANCH_NAME == 'main' ]
+                    if [ "$BRANCH_NAME" == 'main' ]
                     then
                         rm -Rf .kube
                         mkdir .kube

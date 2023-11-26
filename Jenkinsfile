@@ -132,7 +132,7 @@ pipeline {
             }
             when {
                 expression {
-                    return env.BRANCH_NAME == 'main';
+                    return env.BRANCH_NAME == 'origin/main';
                 }
             }
             steps {
@@ -148,11 +148,7 @@ pipeline {
                         cat $KUBECONFIG > .kube/config
                         helm -n prod upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
                         helm -n prod upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
-<<<<<<< HEAD
                         sleep 10
-=======
-                        sleep 5
->>>>>>> 004c61eec957f010cd425fe6a478bf608b444e4a
                         helm -n prod upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
                         helm -n prod upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
                         helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30883 helm-nginx/

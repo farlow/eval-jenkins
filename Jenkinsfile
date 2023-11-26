@@ -138,14 +138,14 @@ pipeline {
                 }
                 script {
                     sh '''
-                    if [ $BRANCH_NAME == 'main' ]
+                    if [ $BRANCH_NAME = 'main' ]
                     then
                         rm -Rf .kube
                         mkdir .kube
                         cat $KUBECONFIG > .kube/config
                         helm -n prod upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
                         helm -n prod upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
-                        sleep 10
+                        sleep 9
                         helm -n prod upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
                         helm -n prod upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
                         helm -n prod upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30883 helm-nginx/

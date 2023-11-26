@@ -93,7 +93,7 @@ pipeline {
 
                     helm -n qa upgrade --install movie-db --values helm-db/values-movie.yaml helm-db/
                     helm -n qa upgrade --install cast-db --values helm-db/values-cast.yaml helm-db/
-                    sleep 5
+                    sleep 6
                     helm -n qa upgrade --install movie-service --values helm-movie-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_MOVIE_IMAGE --set app_image.tag=$DOCKER_TAG helm-movie-service/
                     helm -n qa upgrade --install cast-service --values helm-cast-service/values.yaml --set app_image.repository=$DOCKER_ID/$DOCKER_CAST_IMAGE --set app_image.tag=$DOCKER_TAG helm-cast-service/
                     helm -n qa upgrade --install nginx --values helm-nginx/values.yaml --set nginx.nodeport.nodeport=30881 helm-nginx/
